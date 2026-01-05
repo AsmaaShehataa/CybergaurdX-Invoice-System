@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CyberGuardX - Official Invoice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  /* PRINT OPTIMIZATION - COMPLETE ONE-PAGE FIX */
+  @media print {
+    @page {
+      size: A4;
+      margin: 8mm !important;
+    }
+    
+    body * {
+      visibility: hidden;
+    }
+    
+    #invoice, #invoice * {
+      visibility: visible;
+    }
+    
+    #invoice {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+      background: white;
+    }
+    
+    .no-print, .action-buttons {
+      display: none !important;
+    }
+    
+    /* Print-specific adjustments - ULTRA COMPACT */
+    .invoice-container {
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 10px 15px !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    
+    /* Header section */
+    .company-info h1 {
+      font-size: 20px !important;
+      margin-bottom: 2px !important;
+    }
+    
+    .company-info .h5 {
+      font-size: 12px !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .company-info p {
+      font-size: 9px !important;
+      line-height: 1.1 !important;
+    }
+    
+    .company-address {
+      font-size: 8px !important;
+      margin: 5px 0 !important;
+      line-height: 1.1 !important;
+      padding-left: 8px !important;
+    }
+    
+    .contact-item {
+      font-size: 8px !important;
+      gap: 3px !important;
+    }
+    
+    .vat-id {
+      font-size: 9px !important;
+      padding: 2px 6px !important;
+    }
+    
+    .invoice-meta h3 {
+      font-size: 18px !important;
+      margin-bottom: 12px !important;
+    }
+    
+    .invoice-meta p {
+      font-size: 9px !important;
+      margin: 4px 0 !important;
+    }
+    
+    /* Bill To section */
+    .bill-to {
+      padding: 10px 15px !important;
+      margin-bottom: 15px !important;
+    }
+    
+    .bill-to h5 {
+      font-size: 12px !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .bill-to p {
+      font-size: 10px !important;
+      margin: 4px 0 !important;
+    }
+    
+    /* Items Table */
+    .items-table {
+      margin-bottom: 15px !important;
+    }
+    
+    .items-table th,
+    .items-table td {
+      padding: 6px 8px !important;
+      font-size: 10px !important;
+    }
+    
+    /* Stamp Section */
+    .stamp-section {
+      margin-top: 15px !important;
+    }
+    
+    .stamp-logo-container {
+      width: 120px !important;
+      height: 120px !important;
+      padding: 6px !important;
+    }
+    
+    .stamp-label {
+      font-size: 9px !important;
+      margin-top: 4px !important;
+    }
+    
+    /* Summary Section */
+    .summary-section {
+      width: 250px !important;
+      margin-top: 15px !important;
+      padding: 12px !important;
+    }
+    
+    .summary-table td {
+      padding: 5px 0 !important;
+      font-size: 10px !important;
+    }
+    
+    /* Signature section for print */
+    .signature-section {
+      margin-top: 15px !important;
+      padding: 10px 0 !important;
+      border-top: 1px solid #ccc !important;
+    }
+    
+    .signature-container {
+      gap: 10px !important;
+      max-width: 100% !important;
+    }
+    
+    .signature-box {
+      padding: 6px !important;
+      min-height: 80px !important;
+    }
+    
+    .signature-line {
+      margin: 15px 0 8px !important;
+    }
+    
+    .signature-label {
+      font-size: 8px !important;
+    }
+    
+    .signature-date {
+      font-size: 7px !important;
+    }
+    
+    /* TERMS & CONDITIONS - ULTRA COMPACT */
+    .terms-section {
+      clear: both;
+      margin-top: 15px !important;
+      padding-top: 10px !important;
+      border-top: 1px solid #ccc !important;
+    }
+    
+    .terms-section::before {
+      display: none !important;
+    }
+    
+    .terms-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+    }
+    
+    .terms-column {
+      padding: 6px !important;
+      min-height: 150px !important;
+      background: #f8f9fa !important;
+      border-radius: 3px !important;
+      box-shadow: none !important;
+      border: 1px solid #dee2e6 !important;
+    }
+    
+    .terms-column.english {
+      border-left: 1px solid #3498db !important;
+    }
+    
+    .terms-column.arabic {
+      border-right: 1px solid #3498db !important;
+      direction: rtl !important;
+      text-align: right !important;
+    }
+    
+    .terms-column h6 {
+      font-size: 8px !important;
+      margin-bottom: 4px !important;
+      color: #2c3e50 !important;
+    }
+    
+    .terms-column h6::before {
+      content: '📋';
+      font-size: 8px !important;
+    }
+    
+    .terms-column p {
+      margin: 0 !important;
+      font-size: 6.5px !important;
+      line-height: 1.1 !important;
+      color: #495057 !important;
+    }
+    
+    /* Remove hover effects for print */
+    .items-table tbody tr:hover,
+    .items-table tbody tr:hover td {
+      background: transparent !important;
+      transform: none !important;
+    }
+    
+    /* Footer */
+    .footer-note {
+      margin-top: 15px !important;
+      padding-top: 8px !important;
+      border-top: 1px solid #dee2e6 !important;
+      font-size: 7px !important;
+    }
+    
+    .company-tagline {
+      font-size: 8px !important;
+    }
+    
+    .legal-note {
+      font-size: 6px !important;
+    }
+  }
+  
+  /* SCREEN STYLES - Enhanced Design */
+  body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    color: #2d3748;
+    min-height: 100vh;
+  }
+  
+  .invoice-container {
+    max-width: 820px;
+    margin: 30px auto;
+    background: white;
+    padding: 40px;
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Decorative elements */
+  .invoice-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2c3e50 0%, #3498db 50%, #2c3e50 100%);
+  }
+  
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 25px;
+    margin-bottom: 30px;
+    border-bottom: 3px solid #e9ecef;
+    position: relative;
+  }
+  
+  .company-info {
+    flex: 1;
+  }
+  
+  .company-info h1 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .company-info .h5 {
+    color: #3498db;
+    font-size: 18px;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 8px;
+  }
+  
+  .company-info .h5::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: #3498db;
+    border-radius: 2px;
+  }
+  
+  .company-address {
+    color: #4a5568;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 12px 0;
+    padding-left: 15px;
+    border-left: 3px solid #e9ecef;
+  }
+  
+  .company-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 10px 0;
+  }
+  
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #4a5568;
+    font-size: 12.5px;
+  }
+  
+  .contact-item i {
+    color: #3498db;
+    font-size: 14px;
+  }
+  
+  .vat-id {
+    display: inline-block;
+    background: #f8f9fa;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #2c3e50;
+    border: 1px solid #e9ecef;
+    margin-top: 5px;
+  }
+  
+  .invoice-meta {
+    text-align: right;
+    padding-left: 30px;
+    border-left: 2px solid #e9ecef;
+  }
+  
+  .invoice-meta h3 {
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+    font-size: 26px;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 8px;
+  }
+  
+  .invoice-meta h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 40px;
+    height: 3px;
+    background: #3498db;
+    border-radius: 2px;
+  }
+  
+  .invoice-meta p {
+    margin: 8px 0;
+    font-size: 13.5px;
+    color: #4a5568;
+  }
+  
+  .invoice-meta strong {
+    color: #2c3e50;
+    min-width: 100px;
+    display: inline-block;
+    font-weight: 600;
+  }
+  
+  .invoice-meta span {
+    color: #2d3748;
+    font-weight: 500;
+  }
+  
+  .stamp-logo-container {
+    width: 160px;
+    height: 160px;
+    border: 3px double #3498db;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  .stamp-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  /* Bill To Section */
+  .bill-to {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    padding: 22px 28px;
+    border-radius: 10px;
+    margin-bottom: 35px;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #3498db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  
+  .bill-to h5 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .bill-to h5::before {
+    content: '👤';
+    font-size: 16px;
+  }
+  
+  .bill-to p {
+    margin: 7px 0;
+    color: #4a5568;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .bill-to strong {
+    color: #2c3e50;
+    font-size: 16px;
+    margin-right: 5px;
+  }
+  
+  /* Items Table */
+  .items-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 35px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  }
+  
+  .items-table thead {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  }
+  
+  .items-table th {
+    color: white;
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+  }
+  
+  .items-table th:last-child {
+    border-right: none;
+  }
+  
+  .items-table th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #3498db;
+  }
+  
+  .items-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 13.5px;
+    color: #4a5568;
+    transition: all 0.2s ease;
+  }
+  
+  .items-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  
+  .items-table tbody tr:hover td {
+    transform: translateX(2px);
+  }
+  
+  .items-table tr:nth-child(even) {
+    background: #fafbfd;
+  }
+  
+  /* Stamp Section */
+  .stamp-section {
+    float: left;
+    margin-top: 30px;
+    text-align: center;
+    position: relative;
+  }
+  
+  .stamp-container {
+    width: 160px;
+    height: 160px;
+    border: 3px double #3498db;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0 auto;
+  }
+  
+  .stamp-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  
+  .company-name {
+    font-size: 12px;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+  
+  .stamp-label {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #718096;
+    font-style: italic;
+  }
+  
+  .stamp-section img {
+    max-width: 160px;
+    border: 3px double #3498db;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    transition: transform 0.3s ease;
+  }
+  
+  .stamp-section img:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Summary Section */
+  .summary-section {
+    float: right;
+    width: 320px;
+    margin-top: 30px;
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .summary-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13.5px;
+    color: #4a5568;
+  }
+  
+  .summary-table tr:last-child td {
+    border-bottom: 2px solid #2c3e50;
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 15px;
+    padding-top: 12px;
+  }
+  
+  .summary-table tr:nth-last-child(3) td {
+    font-weight: 600;
+    background: rgba(52, 152, 219, 0.1);
+    padding: 12px 0;
+    border-radius: 4px;
+  }
+  
+  .summary-table td:first-child {
+    padding-right: 15px;
+    color: #2c3e50;
+  }
+  
+  .summary-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #2c3e50;
+    font-family: 'Courier New', monospace;
+  }
+  
+  /* Customer Signature Section - SCREEN STYLES */
+  .signature-section {
+    clear: both;
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 2px dashed #3498db;
+  }
+  
+  .signature-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .signature-box {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #e9ecef;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  .signature-box:hover {
+    background: #f0f7ff;
+    border-color: #3498db;
+  }
+  
+  .signature-line {
+    height: 2px;
+    background: #2c3e50;
+    margin: 25px 0 15px;
+    position: relative;
+  }
+  
+  .signature-line::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    border-bottom: 1px dotted #3498db;
+  }
+  
+  .signature-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .signature-date {
+    font-size: 11px;
+    color: #718096;
+    font-style: italic;
+  }
+  
+  .company-signature {
+    background: #f0f7ff;
+    border-color: #3498db;
+    border-style: solid;
+  }
+  
+  /* Terms & Conditions - Screen Layout */
+  .terms-section {
+    clear: both;
+    margin-top: 90px;
+    padding-top: 25px;
+    border-top: 2px solid #e9ecef;
+    position: relative;
+  }
+  
+  .terms-section::before {
+    content: '📄';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 0 20px;
+    font-size: 20px;
+    color: #3498db;
+  }
+  
+  .terms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+  
+  .terms-column {
+    padding: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* English column on LEFT */
+  .terms-column.english {
+    border-left: 4px solid #3498db;
+  }
+  
+  /* Arabic column on RIGHT */
+  .terms-column.arabic {
+    border-right: 4px solid #3498db;
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .terms-column h6 {
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .terms-column h6::before {
+    content: '📋';
+    font-size: 16px;
+  }
+  
+  .terms-column p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #4a5568;
+    flex-grow: 1;
+  }
+  
+  /* Footer */
+  .footer-note {
+    clear: both;
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.6;
+  }
+  
+  .footer-note p {
+    margin: 5px 0;
+  }
+  
+  .company-tagline {
+    color: #3498db;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  
+  .legal-note {
+    font-size: 11px;
+    color: #a0aec0;
+    font-style: italic;
+  }
+  
+  /* Action Buttons */
+  .action-buttons {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .action-buttons button {
+    padding: 12px 28px;
+    font-size: 14.5px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .action-buttons .btn-primary {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2);
+  }
+  
+  .action-buttons .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
+    background: linear-gradient(135deg, #1a252f 0%, #2980b9 100%);
+  }
+  
+  .action-buttons .btn-secondary {
+    background: linear-gradient(135deg, #718096 0%, #a0aec0 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(113, 128, 150, 0.2);
+  }
+  
+  .action-buttons .btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(113, 128, 150, 0.3);
+    background: linear-gradient(135deg, #4a5568 0%, #718096 100%);
+  }
+  
+  .action-buttons .btn-outline-primary {
+    background: white;
+    color: #2c3e50;
+    border: 2px solid #2c3e50;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1);
+  }
+  
+  .action-buttons .btn-outline-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.2);
+    background: #2c3e50;
+    color: white;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body class="bg-light">
+  <div class="container py-4">
+    <div class="invoice-container" id="invoice">
+      <!-- Header Section -->
+      <div class="invoice-header">
+        <div class="company-info">
+          <h1>CYBERGUARDX</h1>
+          <div class="h5">Integrated Solutions LLC</div>
+          
+          <div class="company-address">
+            <div><strong>Cairo Office:</strong> 42 El-Bahr Street, Sheraton, Cairo, Egypt</div>
+            <div><strong>Alexandria Office:</strong> 16 Mahmoud Fargaly, San Stafano, Alexandria, Egypt</div>
+          </div>
+          
+          <div class="company-contact">
+            <div class="contact-item">
+              <i class="bi bi-phone"></i>
+              <span>Mobile: +20 15 59907901</span>
+            </div>
+            <div class="contact-item">
+              <i class="bi bi-phone"></i>
+              <span>Mobile: +20 15 59907968</span>
+            </div>
+            <div class="contact-item">
+              <i class="bi bi-envelope"></i>
+              <span>Email: info@cyberguardx.org</span>
+            </div>
+          </div>
+          
+          <div class="vat-id">VAT ID: 772-165-114</div>
+        </div>
+        
+        <div class="invoice-meta">
+          <h3>TAX INVOICE</h3>
+          <p><strong>Invoice No:</strong> <span id="invNo">-</span></p>
+          <p><strong>Date:</strong> <span id="invDate">-</span></p>
+        </div>
+      </div>
+
+      <!-- Bill To Section -->
+      <div class="bill-to">
+        <h5>BILL TO:</h5>
+        <p><strong id="bName">-</strong></p>
+        <p><i class="bi bi-envelope"></i> Email: <span id="bEmail">-</span></p>
+        <p><i class="bi bi-telephone"></i> Phone: <span id="bPhone">-</span></p>
+      </div>
+
+      <!-- Items Table -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th width="50%">ITEM DESCRIPTION</th>
+            <th width="15%">QTY</th>
+            <th width="15%">UNIT PRICE</th>
+            <th width="20%">TOTAL (EGP)</th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody">
+          <!-- Items will be inserted here -->
+        </tbody>
+      </table>
+
+      <!-- Stamp Section -->
+      <div class="stamp-section">
+        <div class="stamp-logo-container">
+          <img src="logo.png" alt="CyberGuardX Logo" class="stamp-logo" id="stampLogo">
+        </div>
+        <span class="stamp-label">Official Company Stamp</span>
+      </div>
+
+      <!-- Summary Section -->
+      <div class="summary-section">
+        <table class="summary-table">
+          <tr>
+            <td>Subtotal</td>
+            <td id="sSubtotal">0.00 EGP</td>
+          </tr>
+          <tr>
+            <td>Discount</td>
+            <td id="sDiscount">0.00 EGP</td>
+          </tr>
+          <tr>
+            <td>Net Amount</td>
+            <td id="sNet">0.00 EGP</td>
+          </tr>
+          <tr>
+            <td>VAT 14%</td>
+            <td id="sVAT">0.00 EGP</td>
+          </tr>
+          <tr>
+            <td><strong>TOTAL AMOUNT</strong></td>
+            <td id="sTotal"><strong>0.00 EGP</strong></td>
+          </tr>
+          <tr>
+            <td>PAYMENT AMOUNT</td>
+            <td id="sPayment">0.00 EGP</td>
+          </tr>
+          <tr>
+            <td>BALANCE AMOUNT</td>
+            <td id="sBalance">0.00 EGP</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Customer Signature Section -->
+      <div class="signature-section">
+        <div class="signature-container">
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-label">Customer Signature</div>
+            <div class="signature-date">Date: ______________</div>
+          </div>
+          <div class="signature-box company-signature">
+            <div class="signature-line"></div>
+            <div class="signature-label">Company Authorized Signature</div>
+            <div class="signature-date">Date: ______________</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms & Conditions - Table Layout -->
+      <div class="terms-section">
+        <div class="terms-grid">
+          <!-- English on LEFT side -->
+          <div class="terms-column english">
+            <h6>Terms & Conditions:</h6>
+            <p>
+              1. Course start dates will be scheduled within 15–45 days from booking.<br>
+              2. Date changes require 12 days prior notice.<br>
+              3. Certificates require 75% attendance.<br>
+              4. Instructor may change in force majeure cases.<br>
+              5. Non-payment may prevent attendance.<br>
+              6. Missed sessions may be compensated.<br>
+              7. Refunds within 48 hours minus 20%.<br>
+              8. Postponement up to 60 days with 50% payment.<br>
+              9. No refunds after postponement.<br>
+              10. No refunds after course start notification.
+            </p>
+          </div>
+          
+          <!-- Arabic on RIGHT side -->
+          <div class="terms-column arabic">
+            <h6>الشروط والأحكام:</h6>
+            <p>
+              1. يتم تحديد مواعيد بداية الدورة خلال 15 إلى 45 يومًا من تاريخ الحجز.<br>
+              2. يجوز تغيير موعد الدورة بشرط التقديم قبل البداية بـ 12 يومًا.<br>
+              3. يشترط حضور 75% للحصول على الشهادة.<br>
+              4. يحق للشركة تغيير المحاضر في الحالات القهرية.<br>
+              5. عدم السداد يمنع الحضور.<br>
+              6. يمكن تعويض المحاضرات حسب الإمكانيات.<br>
+              7. الاسترداد خلال 48 ساعة بعد خصم 20%.<br>
+              8. يجوز التأجيل حتى 60 يومًا عند سداد 50%.<br>
+              9. لا يُسمح بالاسترداد بعد التأجيل.<br>
+              10. لا يُسمح بالاسترداد بعد إخطار موعد البدء.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer-note">
+        <p class="company-tagline">Thank you for your business! | CYBERGUARDX Integrated Solutions LLC</p>
+        <p class="legal-note">This is an official tax invoice | VAT included where applicable</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+      <button class="btn btn-primary" onclick="downloadPDF()">
+        <i class="bi bi-download"></i> Download PDF
+      </button>
+      <button class="btn btn-secondary" onclick="window.print()">
+        <i class="bi bi-printer"></i> Print Invoice
+      </button>
+      <button class="btn btn-outline-primary" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Back to Invoice Creation
+      </button>
+    </div>
+  </div>
+
+  <script>
+  // Declare data as a global variable
+  let invoiceData = null;
+
+  // Load invoice data from localStorage
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      const storedData = localStorage.getItem("invoiceData");
+      
+      if (!storedData) {
+        alert("No invoice data found. Please generate an invoice first.");
+        window.location.href = "index.html";
+        return;
+      }
+      
+      invoiceData = JSON.parse(storedData);
+      
+      // Set invoice metadata
+      document.getElementById("invNo").innerText = invoiceData.invoiceNo || '-';
+      document.getElementById("invDate").innerText = invoiceData.date || '-';
+
+      // Set bill to information
+      document.getElementById("bName").innerText = invoiceData.billTo?.name || '-';
+      document.getElementById("bEmail").innerText = invoiceData.billTo?.email || '-';
+      document.getElementById("bPhone").innerText = invoiceData.billTo?.phone || '-';
+
+      // Populate items table
+      const itemsBody = document.getElementById("itemsBody");
+      itemsBody.innerHTML = '';
+      
+      if (invoiceData.items && Array.isArray(invoiceData.items)) {
+        invoiceData.items.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.name || ''}</td>
+            <td>${item.qty || '0'}</td>
+            <td>${parseFloat(item.price || 0).toFixed(2)} EGP</td>
+            <td>${parseFloat(item.total || 0).toFixed(2)} EGP</td>
+          `;
+          itemsBody.appendChild(row);
+        });
+      }
+
+      // Set summary values
+      document.getElementById("sSubtotal").innerText = invoiceData.subtotal || '0.00 EGP';
+      document.getElementById("sDiscount").innerText = invoiceData.discount || '0.00 EGP';
+      document.getElementById("sNet").innerText = invoiceData.net || '0.00 EGP';
+      document.getElementById("sVAT").innerText = invoiceData.vat || '0.00 EGP';
+      document.getElementById("sTotal").innerText = invoiceData.total || '0.00 EGP';
+      document.getElementById("sPayment").innerText = invoiceData.paymentAmount || '0.00 EGP';
+      document.getElementById("sBalance").innerText = invoiceData.balance || '0.00 EGP';
+      
+    } catch (error) {
+      console.error("Error loading invoice data:", error);
+      alert("Error loading invoice data. Please generate a new invoice.");
+      window.location.href = "index.html";
+    }
+  });
+
+  function downloadPDF() {
+    if (!invoiceData) {
+      alert("Invoice data not loaded. Please try again.");
+      return;
+    }
+    
+    const element = document.getElementById('invoice');
+    const filename = `CyberGuardX_Invoice_${invoiceData.invoiceNo || Date.now()}.pdf`;
+    
+    const opt = {
+      margin: [5, 5, 5, 5],
+      filename: filename,
+      image: { 
+        type: 'jpeg', 
+        quality: 0.98 
+      },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        allowTaint: true
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait' 
+      }
+    };
+    
+    const originalButton = document.querySelector('.btn-primary');
+    const originalText = originalButton.innerHTML;
+    originalButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF...';
+    originalButton.disabled = true;
+    
+    setTimeout(() => {
+      html2pdf().set(opt).from(element).save().then(() => {
+        originalButton.innerHTML = originalText;
+        originalButton.disabled = false;
+      }).catch(error => {
+        console.error("PDF generation failed:", error);
+        alert("PDF generation failed. Try:\n1. Click 'Print Invoice' then 'Save as PDF'\n2. Try Chrome browser");
+        originalButton.innerHTML = originalText;
+        originalButton.disabled = false;
+      });
+    }, 500);
+  }
+  </script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</body>
+</html>

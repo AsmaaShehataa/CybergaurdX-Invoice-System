@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+}
+
+.invoice {
+  width: 820px;
+  margin: auto;
+  background: #fff;
+  padding: 40px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.logo {
+  width: 170px;
+}
+
+.inv-meta {
+  text-align: right;
+}
+
+.billto {
+  margin: 30px 0;
+}
+
+.items {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.items th {
+  text-align: left;
+  border-bottom: 2px dotted #000;
+}
+
+.items td {
+  border-bottom: 1px dotted #000;
+  padding: 6px 0;
+}
+
+.items th:nth-child(2),
+.items td:nth-child(2),
+.items th:nth-child(3),
+.items td:nth-child(3) {
+  text-align: right;
+}
+
+.summary {
+  width: 45%;
+  float: right;
+  margin-top: 30px;
+}
+
+.summary td {
+  padding: 6px 0;
+}
+
+.summary .bold td {
+  font-weight: bold;
+}
+
+.stamp {
+  margin-top: 40px;
+}
+
+.stamp img {
+  width: 140px;
+}
+
+.terms {
+  font-size: 11px;
+  margin-top: 30px;
+  line-height: 1.6;
+}
+
+.actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+@media print {
+  body { background: none; }
+  .actions { display: none; }
+}
