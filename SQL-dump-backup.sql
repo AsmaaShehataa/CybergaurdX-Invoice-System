@@ -1,5 +1,13 @@
 -- 1. Create the database
 CREATE DATABASE IF NOT EXISTS CyberguardX_invoice_system;
+CREATE USER IF NOT EXISTS 'CyberguardX'@'localhost' IDENTIFIED BY 'admin2026';
+GRANT ALL PRIVILEGES ON CyberguardX_invoice_system . * TO 'CyberguardX'@'localhost';
+FLUSH PRIVILEGES;
+GRANT SELECT ON  `performance_schema`.* TO 'CyberguardX'@'localhost';
+
+FLUSH PRIVILEGES;
+
+
 USE CyberguardX_invoice_system;
 
 
