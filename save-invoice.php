@@ -1,5 +1,5 @@
 <?php
-// save-invoice.php
+// save-invoice.php - FIXED with Direct SQL
 ini_set('session.save_path', '/tmp');
 session_start();
 require_once 'includes/config.php';
@@ -10,11 +10,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Enable error reporting for debugging
+// Enable error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Get form data with validation
+// Get form data
 $client_name = trim($_POST['client_name'] ?? '');
 $client_address = trim($_POST['client_address'] ?? '');
 $client_email = trim($_POST['client_email'] ?? '');
@@ -23,40 +23,27 @@ $bill_name = trim($_POST['bill_name'] ?? $client_name);
 $bill_email = trim($_POST['bill_email'] ?? $client_email);
 $bill_phone = trim($_POST['bill_phone'] ?? $client_phone);
 
-$offer_type = $_POST['offer_type'] ?? 'none';
+// Get and CLEAN offer_type - USE THE SAME FUNCTION!
+$offer_type_raw = $_POST['offer_type'] ?? 'none';
+$offer_type = cleanForEnum($offer_type_raw, ['none', 'percent', 'fixed']);
 $offer_value = floatval($_POST['offer_value'] ?? 0);
 $payment_amount = floatval($_POST['payment_amount'] ?? 0);
 
-// Get calculated values - MATCHING YOUR FORM FIELDS
+// Get calculated values
 $subtotal = floatval($_POST['subtotal'] ?? 0);
 $discount = floatval($_POST['discount'] ?? 0);
-$net = floatval($_POST['net'] ?? 0);          // Form: "Net Amount"
-$vat = floatval($_POST['vat'] ?? 0);          // Form: "VAT 14%"
-$total = floatval($_POST['total'] ?? 0);      // Form: "Total"
-$balance = floatval($_POST['balance'] ?? 0);  // Form: "Balance Amount"
-
-// Debug: Show what values we're getting
-error_log("Invoice Data: subtotal=$subtotal, discount=$discount, net=$net, vat=$vat, total=$total, balance=$balance");
+$net = floatval($_POST['net'] ?? 0);
+$vat = floatval($_POST['vat'] ?? 0);
+$total = floatval($_POST['total'] ?? 0);
+$balance = floatval($_POST['balance'] ?? 0);
 
 // Get items data
 $items_json = $_POST['items'] ?? '[]';
 $items = json_decode($items_json, true);
 
-// Validate required fields
-if (empty($client_name)) {
-    die("Error: Client name is required");
-}
-
-if (empty($client_email)) {
-    die("Error: Client email is required");
-}
-
-if (empty($bill_name)) {
-    die("Error: Bill to name is required");
-}
-
-if (empty($bill_email)) {
-    die("Error: Bill to email is required");
+// Validate
+if (empty($client_name) || empty($client_email) || empty($bill_name) || empty($bill_email)) {
+    die("Error: Required fields missing");
 }
 
 if (!is_array($items) || count($items) === 0) {
@@ -81,6 +68,26 @@ function generateInvoiceNumber($conn) {
 $invoice_number = generateInvoiceNumber($conn);
 $issue_date = date('Y-m-d');
 $due_date = date('Y-m-d', strtotime('+30 days'));
+$status = 'draft';
+
+// Clean string for ENUM column - SAME FUNCTION AS edit-invoice.php
+function cleanForEnum($value, $allowed_values) {
+    // Convert to UTF-8
+    $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+    
+    // Remove all non-ASCII characters (ENUM only supports ASCII)
+    $value = preg_replace('/[^\x20-\x7E]/', '', $value);
+    
+    // Trim and lowercase
+    $value = strtolower(trim($value));
+    
+    // Validate against allowed values
+    if (!in_array($value, $allowed_values)) {
+        return $allowed_values[0]; // Return first allowed value (usually 'none')
+    }
+    
+    return $value;
+}
 
 // Start transaction
 $conn->begin_transaction();
@@ -89,7 +96,6 @@ try {
     // 1. Save or get client
     $client_id = null;
     
-    // Check if client exists by email
     $stmt = $conn->prepare("SELECT id FROM clients WHERE email = ?");
     $stmt->bind_param("s", $client_email);
     $stmt->execute();
@@ -99,12 +105,10 @@ try {
         $client = $result->fetch_assoc();
         $client_id = $client['id'];
         
-        // Update client info
         $update_stmt = $conn->prepare("UPDATE clients SET name = ?, phone = ?, address = ? WHERE id = ?");
         $update_stmt->bind_param("sssi", $client_name, $client_phone, $client_address, $client_id);
         $update_stmt->execute();
     } else {
-        // Create new client
         $stmt = $conn->prepare("INSERT INTO clients (name, email, phone, address, created_by) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("ssssi", $client_name, $client_email, $client_phone, $client_address, $_SESSION['user_id']);
         
@@ -114,49 +118,50 @@ try {
         $client_id = $conn->insert_id;
     }
     
-    // 2. Save invoice - Using 'net' column (matches your form's "Net Amount")
-    $stmt = $conn->prepare("INSERT INTO invoices (
-        invoice_number, 
-        user_id, 
-        client_id, 
-        issue_date, 
-        due_date, 
-        subtotal, 
-        discount, 
-        net,
-        vat, 
-        total, 
-        payment_amount, 
-        balance, 
-        offer_type, 
-        offer_value
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // 2. Save invoice - USE DIRECT SQL LIKE IN edit-invoice.php
+    $notes = '';
+    $terms_conditions = '';
     
-    // Bind parameters - ORDER MATTERS!
-    $stmt->bind_param("siissdddddddss", 
-        $invoice_number,            // 1
-        $_SESSION['user_id'],       // 2
-        $client_id,                 // 3
-        $issue_date,                // 4
-        $due_date,                  // 5
-        $subtotal,                  // 6
-        $discount,                  // 7
-        $net,                       // 8 - "Net Amount" from form
-        $vat,                       // 9 - "VAT 14%" from form
-        $total,                     // 10 - "Total" from form
-        $payment_amount,            // 11
-        $balance,                   // 12 - "Balance Amount" from form
-        $offer_type,                // 13
-        $offer_value                // 14
+    // Build direct SQL query
+    $sql = sprintf("INSERT INTO invoices (
+        invoice_number, user_id, client_id, issue_date, due_date, 
+        subtotal, discount, net, vat, total, status,
+        payment_amount, balance, offer_type, offer_value,
+        notes, terms_conditions
+    ) VALUES (
+        '%s', %d, %d, '%s', '%s', 
+        %.2f, %.2f, %.2f, %.2f, %.2f, '%s',
+        %.2f, %.2f, '%s', %.2f,
+        '%s', '%s'
+    )",
+        $conn->real_escape_string($invoice_number),
+        $_SESSION['user_id'],
+        $client_id,
+        $conn->real_escape_string($issue_date),
+        $conn->real_escape_string($due_date),
+        $subtotal,
+        $discount,
+        $net,
+        $vat,
+        $total,
+        $conn->real_escape_string($status),
+        $payment_amount,
+        $balance,
+        $conn->real_escape_string($offer_type),  // ← CLEANED and ESCAPED!
+        $offer_value,
+        $conn->real_escape_string($notes),
+        $conn->real_escape_string($terms_conditions)
     );
     
-    if (!$stmt->execute()) {
-        throw new Exception("Failed to save invoice: " . $stmt->error);
+    error_log("Insert SQL: " . $sql);
+    
+    if (!$conn->query($sql)) {
+        throw new Exception("Failed to save invoice: " . $conn->error);
     }
     
     $invoice_id = $conn->insert_id;
     
-    // 3. Save invoice items
+    // 3. Save invoice items (can still use prepared statement)
     $stmt = $conn->prepare("INSERT INTO invoice_items (invoice_id, item_type, description, quantity, unit_price, total) VALUES (?, ?, ?, ?, ?, ?)");
     
     foreach ($items as $item) {
@@ -166,9 +171,7 @@ try {
         $unit_price = floatval($item['unitPrice'] ?? 0);
         $item_total = floatval($item['total'] ?? 0);
         
-        if (empty($description)) {
-            continue; // Skip empty items
-        }
+        if (empty($description)) continue;
         
         $stmt->bind_param("issddd", $invoice_id, $item_type, $description, $quantity, $unit_price, $item_total);
         if (!$stmt->execute()) {
@@ -179,35 +182,41 @@ try {
     // Commit transaction
     $conn->commit();
     
-    // Store bill info in session for view-invoice.php
+    // Store bill info
     $_SESSION['last_bill_info'] = [
         'name' => $bill_name,
         'email' => $bill_email,
         'phone' => $bill_phone
     ];
     
-    // Debug success
-    error_log("Invoice saved successfully: ID=$invoice_id, Number=$invoice_number");
+    error_log("✅ Invoice saved: ID=$invoice_id, Number=$invoice_number");
     
-    // Redirect to view invoice
+    // Redirect
     header("Location: view-invoice.php?id=" . $invoice_id);
     exit();
     
 } catch (Exception $e) {
-    // Rollback on error
     $conn->rollback();
     
-    // Log error
-    error_log("Invoice save error: " . $e->getMessage());
+    // Show friendly error
+    echo "<div style='padding: 20px; background: #fee; border: 2px solid red; border-radius: 10px; margin: 20px;'>";
+    echo "<h3>❌ Error Saving Invoice</h3>";
+    echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
     
-    // Show detailed error
-    die("Error saving invoice: " . $e->getMessage() . 
-        "<br><br>Values being saved:<br>" .
-        "Subtotal: $subtotal<br>" .
-        "Discount: $discount<br>" .
-        "Net: $net<br>" .
-        "VAT: $vat<br>" .
-        "Total: $total<br>" .
-        "Balance: $balance");
+    // Debug info
+    echo "<div style='background: #fff; padding: 15px; margin: 15px 0; border-radius: 5px;'>";
+    echo "<h4>Debug Information:</h4>";
+    echo "Invoice Number: " . htmlspecialchars($invoice_number ?? 'N/A') . "<br>";
+    echo "Client ID: " . ($client_id ?? 'N/A') . "<br>";
+    echo "Subtotal: $subtotal<br>";
+    echo "Total: $total<br>";
+    echo "Status: $status<br>";
+    echo "Offer Type: '" . htmlspecialchars($offer_type) . "' (cleaned)<br>";
+    echo "Offer Type Raw: '" . htmlspecialchars($offer_type_raw) . "'<br>";
+    echo "</div>";
+    
+    echo "<p><a href='create-invoice.php' style='color: blue;'>← Go back and try again</a></p>";
+    echo "</div>";
+    exit();
 }
 ?>
