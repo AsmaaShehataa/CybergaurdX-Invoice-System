@@ -1,8 +1,8 @@
 <?php
 // edit-invoice.php - CLEAN DESIGN WITH DISCOUNT OPTIONS
-require_once dirname(__DIR__) . '/includes/session-config.php';
+require_once dirname(__DIR__) . '/includes/init.php';
 startAppSession();
-require_once dirname(__DIR__) . '/includes/config.php';
+//require_once dirname(__DIR__) . '/includes/config.php';
 
 // Check login
 if (!isset($_SESSION['user_id'])) {

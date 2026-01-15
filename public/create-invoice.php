@@ -1,8 +1,8 @@
 <?php
 // create-invoice.php - ORIGINAL BEAUTIFUL VERSION
-require_once dirname(__DIR__) . '/includes/session-config.php';
+require_once dirname(__DIR__) . '/includes/init.php';
 startAppSession();
-require_once dirname(__DIR__) . '/includes/config.php';
+//require_once dirname(__DIR__) . '/includes/config.php';
 
 // Check if logged in
 if (!isset($_SESSION['user_id'])) {

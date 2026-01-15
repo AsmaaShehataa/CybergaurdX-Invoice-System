@@ -1,9 +1,9 @@
 <?php
 // invoices.php - ENHANCED VERSION WITH FIXED DIRECT SQL (FROM OLD PROJECT)
-require_once dirname(__DIR__) . '/includes/session-config.php';
+require_once dirname(__DIR__) . '/includes/init.php';
 startAppSession();
-require_once dirname(__DIR__) . '/includes/config.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
+//require_once dirname(__DIR__) . '/includes/config.php';
+//require_once dirname(__DIR__) . '/includes/auth.php';
 
 // Check if user is logged in
 requireLogin();

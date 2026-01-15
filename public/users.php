@@ -1,8 +1,7 @@
 <?php
 // users.php - User Management (Admin Only)
 // Use central session configuration
-require_once dirname(__DIR__) . '/includes/session-config.php';
-startAppSession();
+require_once dirname(__DIR__) . '/includes/init.php';
 require_once dirname(__DIR__) . '/includes/config.php';
 
 // Check if logged in and is admin

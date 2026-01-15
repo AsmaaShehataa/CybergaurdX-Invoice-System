@@ -1,6 +1,6 @@
 <?php
 // dashboard.php - ORIGINAL CEO-APPROVED VERSION WITH NEW SESSION HANDLING
-require_once dirname(__DIR__) . '/includes/session-config.php';
+require_once dirname(__DIR__) . '/includes/init.php';
 startAppSession();
 
 // Check if logged in
@@ -92,12 +92,7 @@ require_once dirname(__DIR__) . '/includes/config.php';
                 <a href="reports.php" class="btn">View Reports</a>
             </div>
             
-            <div class="action-card">
-                <i class="fas fa-database" style="color: #ef4444;"></i>
-                <h3>Database Admin</h3>
-                <p>Manage database and users</p>
-                <a href="phpmyadmin-style.php" class="btn">Admin Panel</a>
-            </div>
+
             
             <!-- ADD THE "MANAGE USERS" CARD HERE -->
             <div class="action-card">

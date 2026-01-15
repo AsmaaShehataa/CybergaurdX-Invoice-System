@@ -1,8 +1,8 @@
 <?php
 // view-invoice.php - FIXED FOR NEW PROJECT STRUCTURE
-require_once dirname(__DIR__) . '/includes/session-config.php';
+require_once dirname(__DIR__) . '/includes/init.php';
 startAppSession();
-require_once dirname(__DIR__) . '/includes/config.php';
+// require_once dirname(__DIR__) . '/includes/config.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -706,7 +706,9 @@ $can_delete = $is_admin;
     }
   }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+</script>
 </head>
 
 <body class="bg-light">
@@ -953,48 +955,144 @@ $can_delete = $is_admin;
   </div>
 
   <script>
-  function downloadPDF() {
+function downloadPDF() {
     const element = document.getElementById('invoice');
     const invoiceNo = document.getElementById('invNo').textContent;
     const filename = `CyberGuardX_Invoice_${invoiceNo}.pdf`;
-    
-    const opt = {
-      margin: [5, 5, 5, 5],
-      filename: filename,
-      image: { 
-        type: 'jpeg', 
-        quality: 0.98 
-      },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait' 
-      }
-    };
     
     const originalButton = document.querySelector('.btn-primary');
     const originalText = originalButton.innerHTML;
     originalButton.innerHTML = '⏳ Generating PDF...';
     originalButton.disabled = true;
     
+    // Create a print-friendly version
+    const printWindow = window.open('', '_blank');
+    
+    // Get all CSS from the current page
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(style => style.outerHTML)
+        .join('');
+    
+    // Create print-optimized HTML
+    const printHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${filename}</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            ${styles}
+            <style>
+                @media print {
+                    @page { margin: 10mm; }
+                    body { 
+                        margin: 0; 
+                        padding: 0; 
+                        background: white !important;
+                        font-family: Arial, sans-serif !important;
+                    }
+                    .no-print, .action-buttons { display: none !important; }
+                    .invoice-container {
+                        max-width: 100% !important;
+                        margin: 0 !important;
+                        padding: 10px !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                    }
+                    * { 
+                        visibility: visible !important; 
+                        color: #000 !important;
+                        background-color: transparent !important;
+                    }
+                }
+                body { 
+                    padding: 20px !important; 
+                    background: white !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                .invoice-container {
+                    background: white !important;
+                    color: #000 !important;
+                }
+            </style>
+        </head>
+        <body>
+            <div id="print-invoice" style="background: white; color: #000;">
+                ${element.innerHTML}
+            </div>
+            <script>
+                // Auto-print and close
+                setTimeout(() => {
+                    window.print();
+                    setTimeout(() => {
+                        window.close();
+                    }, 500);
+                }, 1000);
+            <\/script>
+        </body>
+        </html>
+    `;
+    
+    printWindow.document.write(printHTML);
+    printWindow.document.close();
+    
+    // Fallback restore
     setTimeout(() => {
-      html2pdf().set(opt).from(element).save().then(() => {
         originalButton.innerHTML = originalText;
         originalButton.disabled = false;
-      }).catch(error => {
-        console.error("PDF generation failed:", error);
-        alert("PDF generation failed. Please try the print option instead.");
-        originalButton.innerHTML = originalText;
-        originalButton.disabled = false;
-      });
-    }, 500);
-  }
+    }, 5000);
+}
+
+// Alternative method if the first fails
+// function tryAlternativePDFMethod(element, filename, tempContainer, originalButton, originalText) {
+//     console.log("Trying alternative PDF method...");
+    
+//     // Use html2canvas + jsPDF directly
+//     html2canvas(element, {
+//         scale: 2,
+//         useCORS: true,
+//         backgroundColor: '#FFFFFF',
+//         width: element.offsetWidth,
+//         windowWidth: element.offsetWidth,
+//         logging: true
+//     }).then(canvas => {
+//         console.log("Canvas created:", canvas.width, "x", canvas.height);
+        
+//         // Get jsPDF instance
+//         const { jsPDF } = window.jspdf;
+        
+//         const pdf = new jsPDF({
+//             orientation: 'portrait',
+//             unit: 'mm',
+//             format: 'a4'
+//         });
+        
+//         const imgWidth = 190; // mm
+//         const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+//         const imgData = canvas.toDataURL('image/png');
+        
+//         pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+//         pdf.save(filename);
+        
+//         // Clean up
+//         document.body.removeChild(tempContainer);
+//         originalButton.innerHTML = originalText;
+//         originalButton.disabled = false;
+        
+//     }).catch(error => {
+//         console.error("Alternative method also failed:", error);
+        
+//         // Show error to user
+//         alert(`PDF generation failed: ${error.message}\n\nPlease use the "Print Invoice" button and save as PDF from the print dialog.`);
+        
+//         // Clean up
+//         document.body.removeChild(tempContainer);
+//         originalButton.innerHTML = originalText;
+//         originalButton.disabled = false;
+//     });
+// }
   
   function confirmDelete(invoiceId, invoiceNumber) {
     if (confirm(`Are you sure you want to delete invoice ${invoiceNumber}?\n\nYou'll be taken to a confirmation page.`)) {
