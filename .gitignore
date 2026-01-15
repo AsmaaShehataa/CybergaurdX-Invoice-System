@@ -1,0 +1,32 @@
+.DS_Store
+*.log
+.env
+/vendor/
+/node_modules/
+/storage/logs/*
+/storage/sessions/*
+/storage/cache/*
+/storage/temp/*
+!/storage/logs/.gitkeep
+!/storage/sessions/.gitkeep
+!/storage/cache/.gitkeep
+!/storage/temp/.gitkeep
+/public/assets/images/uploads/*
+!/public/assets/images/.gitkeep
+.idea/
+.vscode/
+composer.lock
+package-lock.json
+yarn.lock
+*.env
+config/local.php
+.env
+/vendor/
+composer.lock
+
+# Test and check directories
+test-checks/
+
+# Composer files
+composer.json
+

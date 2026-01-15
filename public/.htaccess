@@ -1,0 +1,27 @@
+RewriteEngine On
+
+# Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Pretty URLs for common pages
+RewriteRule ^login$ index.php [L]
+RewriteRule ^dashboard$ dashboard.php [L]
+RewriteRule ^invoices$ invoices.php [L]
+RewriteRule ^invoice/create$ create-invoice.php [L]
+RewriteRule ^invoice/([0-9]+)/view$ view-invoice.php?id=$1 [L]
+RewriteRule ^invoice/([0-9]+)/edit$ edit-invoice.php?id=$1 [L]
+RewriteRule ^users$ users.php [L]
+RewriteRule ^user/create$ create-user.php [L]
+RewriteRule ^user/([0-9]+)/edit$ edit-user.php?id=$1 [L]
+RewriteRule ^logout$ logout.php [L]
+
+# Prevent direct access to .php files
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+([^.?\ ]+)\.php[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L,NE]
+
+# Security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-XSS-Protection "1; mode=block"

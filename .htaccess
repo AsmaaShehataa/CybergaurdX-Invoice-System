@@ -1,0 +1,24 @@
+# .htaccess in root directory
+RewriteEngine On
+
+# Redirect all requests to public/ directory
+RewriteRule ^$ public/ [L]
+RewriteRule (.*) public/$1 [L]
+
+# Security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Prevent access to protected directories
+RedirectMatch 403 ^/includes/?.*$
+RedirectMatch 403 ^/storage/?.*$
+RedirectMatch 403 ^/scripts/?.*$
+RedirectMatch 403 ^/templates/?.*$
+
+# Protect sensitive files
+<FilesMatch "\.(sql|log|txt|md|env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
