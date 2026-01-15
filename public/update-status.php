@@ -2,7 +2,7 @@
 // update-status.php - Update invoice status
 
 // Use central session configuration
-require_once dirname(__DIR__) . '/includes/session-config.php';
+require_once dirname(__DIR__) . '/includes/init.php';
 startAppSession();
 
 // Check login
